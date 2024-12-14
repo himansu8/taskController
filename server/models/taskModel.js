@@ -12,7 +12,8 @@ const taskSchema = new Schema({
     },
     createdAt: {
         type: Date,
-        required: true
+        required: true,
+        default: Date.now
     },
     deadline: {
         type: Date,
@@ -22,6 +23,12 @@ const taskSchema = new Schema({
         type: Boolean,
         required: true
     },
+    priority: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5
+    }
 
 
 });

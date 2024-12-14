@@ -5,8 +5,11 @@ import mongoose from 'mongoose';
 export async function createTask(req, res) {
     try {
   
-        const { taskName, taskDeadLine } = req.body
+        const { taskName, taskDeadLine,priority,startDate   } = req.body
 
+        if (priority < 1 || priority > 5) {
+            return res.status(400).json({ error: 'Priority must be between 1 and 5' });
+        }
         // find user id database
         let userFound = await userModel.findById(req.user.user_id)
         //console.log(userFound)
@@ -14,17 +17,8 @@ export async function createTask(req, res) {
             return res.status(404).json({ error: 'not found' })
         }
 
-        let cur_date = new Date();
+        let cur_date = new Date(startDate );
         let deadline_date = new Date(taskDeadLine);
-
-
-        const existingTask = await taskModel.findOne({
-            taskName: taskName
-        });
-
-        if (existingTask) {
-            return res.status(400).json({ error: 'Task name already exists for this user' });
-        }
 
 
         let taskObj = {
@@ -33,6 +27,7 @@ export async function createTask(req, res) {
             createdAt: cur_date,
             deadline: deadline_date,
             isCompleted: false,
+            priority,
         }
 
         let task = await taskModel.create(taskObj);
@@ -120,10 +115,13 @@ export async function singleTask(req, res) {
 export async function updateTask(req, res) {
     try {
         const { taskid } = req.params
-        const { updateTaskName, taskDeadLine, newIsCompleted } = req.body
+        const { updateTaskName, taskDeadLine, newIsCompleted, updatePriority, updateStartDate  } = req.body
         //console.log(req.body);
         //console.log(req.params);
 
+        if (updatePriority && (updatePriority < 1 || updatePriority > 5)) {
+            return res.status(400).json({ error: 'Priority must be between 1 and 5' });
+        }
 
         let userFound = await userModel.findById(req.user.user_id)
         //console.log(userFound)
@@ -141,7 +139,7 @@ export async function updateTask(req, res) {
 
         let task = await taskModel.findByIdAndUpdate(
             taskid,
-            { $set: { taskName: updateTaskName, deadline: deadline_date, isCompleted: newIsCompleted } },
+            { $set: { taskName: updateTaskName, deadline: deadline_date, isCompleted: newIsCompleted, priority:updatePriority, createdAt: new Date(updateStartDate)  } },
             { new: true }
         );
         if (!task) {
@@ -157,5 +155,25 @@ export async function updateTask(req, res) {
 
 
 
+    }
+}
+
+export async function summaryTask(req, res) {
+    try {
+        const userId = req.user.user_id; 
+        const tasks = await taskModel.find({ userId }); 
+    
+        const totalTasks = tasks.length;
+        const completedTasks = tasks.filter((task) => task.isCompleted).length;
+        const pendingTasks = totalTasks - completedTasks;
+    
+        res.json({
+          totalTasks,
+          completedTasks,
+          pendingTasks,
+        });
+    } catch (error) {
+        console.error(error);
+    res.status(500).send('Server error');
     }
 }

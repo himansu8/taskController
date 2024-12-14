@@ -1,6 +1,7 @@
 import express from 'express';
 import { authMiddleware } from '../middlewares/auth/verifyToken.js';
-import { allTask, createTask, deleteTask, singleTask, updateTask } from '../controller/taskController.js';
+import { allTask, createTask, deleteTask, singleTask, summaryTask, updateTask } from '../controller/taskController.js';
+import { taskNameValidation, validationErrors } from '../middlewares/validation/index.js';
 
 
 const router = express.Router();
@@ -10,7 +11,7 @@ description: create a single task
 method :post
 api_url: api/task
 */
-router.post('/',authMiddleware, createTask);
+router.post('/',authMiddleware,taskNameValidation(),validationErrors, createTask);
 
 
 /*
@@ -40,7 +41,16 @@ description: update a single task
 method :patch
 api_url: api/task/:taskid
 */
-router.put('/:taskid',authMiddleware,updateTask);
+router.put('/:taskid',authMiddleware, updateTask);
+
+
+/*
+description: get a single task
+method :get
+api_url: api/task/:taskid
+*/
+router.get('/data/summary',authMiddleware,summaryTask);
+
 
 
 export default router; 
