@@ -38,7 +38,7 @@ function Login() {
       localStorage.setItem('token', JSON.stringify({ token, details }));
       dispatch({ type: "LOGIN_SUCCESS", payload: details });
       toast.success("You are logged in!");
-      navigate('/');
+      navigate('/dashboard');
     } catch (error) {
       dispatch({ type: "LOGIN_FAILURE", payload: error.response.data });
       let errorString = "";

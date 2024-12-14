@@ -52,17 +52,22 @@ function Home() {
     const [updatedTaskId, setUpdateTaskId] = useState(null);
     const [updatedTaskName, setUpdatedTaskName] = useState(null);
     const [updatedDeadline, setUpdatedDeadline] = useState(null);
+    const [updatedStartDate, setUpdatedStartDate] = useState(null);
+
 
     const handleUpdateModalClose = () => setShowUpdateModal(false);
 
-    const handleUpdateModalShow = (id, taskName, deadline) => {
+    const handleUpdateModalShow = (id, taskName, deadline, startDate) => {
         setUpdateTaskId(id);
         setUpdatedTaskName(taskName);
         setUpdatedDeadline(deadline);
+        setUpdatedStartDate(startDate)
         setShowUpdateModal(true);
     };
 
     async function deleteTask(taskId) {
+        const confirmDelete = window.confirm("Are you sure you want to delete this task?");
+        if (!confirmDelete) return;
         try {
             const token = JSON.parse(localStorage.getItem('token')).token;
             const res = await axios.delete(`${process.env.REACT_APP_BASE_URL}/api/task/${taskId}`, {
@@ -81,7 +86,11 @@ function Home() {
 
     // Delete multiple tasks
     async function deleteSelectedTasks() {
+        const confirmDelete = window.confirm("Are you sure you want to delete selected tasks?");
+        if (!confirmDelete) return;
+
         try {
+
             const token = JSON.parse(localStorage.getItem('token')).token;
             for (let taskId of selectedTasks) {
                 await axios.delete(`${process.env.REACT_APP_BASE_URL}/api/task/${taskId}`, {
@@ -101,12 +110,12 @@ function Home() {
     const handleSelectTask = (taskId) => {
         setSelectedTasks(prevState =>
             prevState.includes(taskId)
-                ? prevState.filter(id => id !== taskId) 
+                ? prevState.filter(id => id !== taskId)
                 : [...prevState, taskId]
         );
     };
 
-    const filterTasks = async (filterType) => {
+    const filterTasks = async (filterType, priority) => {
         const token = JSON.parse(localStorage.getItem('token')).token;
         let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/task`, {
             headers: {
@@ -130,10 +139,17 @@ function Home() {
                 setTaskTitle("Tasks");
                 break;
             default:
-                filteredTasks = tasks;
+                filteredTasks = tasksData;
         }
+
+        // Filter by priority if specified
+        if (priority) {
+            filteredTasks = filteredTasks.filter((task) => task.priority === priority);
+        }
+
         setTasks(filteredTasks);
     };
+
 
     // Sorting function
     const sortTasks = (criteria) => {
@@ -158,6 +174,13 @@ function Home() {
         setTasks(sortedTasks);
     };
 
+    const handleClearFilters = async () => {
+
+        setTaskTitle("Tasks");
+        setSortCriteria("");
+        await fetchTasks();
+        setSelectedTasks([]);
+    };
     return (
         <Container fluid>
             <Container>
@@ -205,24 +228,39 @@ function Home() {
                                     Priority
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    <Dropdown.Item>High Priority</Dropdown.Item>
-                                    <Dropdown.Item>Low Priority</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => filterTasks("all", 1)}>1</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => filterTasks("all", 2)}>2</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => filterTasks("all", 3)}>3</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => filterTasks("all", 4)}>4</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => filterTasks("all", 5)}>5</Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
                         </div>
                     </div>
                 </Row>
+                <Row>
+                    <div className="col-lg-12 d-flex justify-content-between align-items-center mb-3 mt-4">
 
+                    <Button
+                        variant="danger"
+                        className="mb-3 rounded-pill"
+                        disabled={selectedTasks.length === 0}
+                        onClick={deleteSelectedTasks}>
+                        Delete Selected Tasks
+                    </Button>
+                    <Button
+                        variant="danger"
+                        className="rounded-pill btn-sm"
+                        onClick={handleClearFilters}
+                    >
+                        Clear Filters
+                    </Button>
+                    </div>
+                </Row>
                 <Row>
                     <div className="col-lg-12">
                         <h1>{taskTitle}</h1>
-                        <Button
-                            variant="danger"
-                            className="mb-3"
-                            disabled={selectedTasks.length === 0}
-                            onClick={deleteSelectedTasks}>
-                            Delete Selected Tasks
-                        </Button>
+
                         <Table responsive striped bordered hover>
                             <thead>
                                 <tr>
@@ -240,6 +278,7 @@ function Home() {
                                         />
                                     </th>
                                     <th>Serial No</th>
+                                    <th>Priority</th>
                                     <th>Task Name</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
@@ -260,7 +299,9 @@ function Home() {
                                                     onChange={() => handleSelectTask(task._id)}
                                                 />
                                             </td>
+
                                             <td>{1 + index}</td>
+                                            <td>{task?.priority}</td>
                                             <td>{task?.taskName}</td>
                                             <td>{new Date(task?.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}</td>
                                             <td>{new Date(task?.deadline).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}</td>
@@ -269,7 +310,7 @@ function Home() {
                                                 <span className="delete-button" type="delete" style={{ cursor: "pointer" }} onClick={() => deleteTask(task._id)}><MdDelete className="fs-3" /></span>
                                             </td>
                                             <td>
-                                                <span className="edit-button" type="edit" style={{ cursor: "pointer" }} onClick={() => handleUpdateModalShow(task._id, task.taskName, task.deadline)}><MdEdit className="fs-3" /></span>
+                                                <span className="edit-button" type="edit" style={{ cursor: "pointer" }} onClick={() => handleUpdateModalShow(task._id, task.taskName, task.deadline, task.createdAt)}><MdEdit className="fs-3" /></span>
                                             </td>
                                             <td>
                                                 <span className="edit-button" type="edit" style={{ cursor: "pointer" }} onClick={() => handleViewModalShow(task._id)}><FaEye className="fs-3" /></span>
@@ -278,7 +319,7 @@ function Home() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="7">Loading...</td>
+                                        <td colSpan="10" className="text-center">No tasks found .</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -297,6 +338,7 @@ function Home() {
                 id={updatedTaskId}
                 taskName={updatedTaskName}
                 deadline={updatedDeadline}
+                startDate={updatedStartDate}
                 setTasks={setTasks}
                 fetchTasks={fetchTasks}
             />

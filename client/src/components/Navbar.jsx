@@ -30,7 +30,9 @@ function NavbarComponent() {
     className={`bg-body-tertiary`}
   >
     <Container>
-      <Navbar.Brand href="/">TASK MANAGER HOME</Navbar.Brand>
+      <Navbar.Brand href="/dashboard">DASHBOARD</Navbar.Brand>
+      <Navbar.Brand href="/">TASKS</Navbar.Brand>
+
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
