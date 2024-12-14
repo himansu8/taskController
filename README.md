@@ -6,7 +6,11 @@
 ------------------APIs--------------------
 userRoutes
     - signup / register 
+<<<<<<< HEAD
     - login
+=======
+    - login 
+>>>>>>> 6b9e19f75a968f1813f68416805dfbefd7b3156e
 
 taskRoutes (Create Read Update Delete)
     - Create a Task 
@@ -15,4 +19,7 @@ taskRoutes (Create Read Update Delete)
     - update / Edit the Task 
     - Delete a Task
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6b9e19f75a968f1813f68416805dfbefd7b3156e
