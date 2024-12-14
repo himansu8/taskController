@@ -5,8 +5,8 @@
 - Task CRUD Operations.
 ------------------APIs--------------------
 userRoutes
-    - signup / register (DONE)
-    - login (DONE)
+    - signup / register 
+    - login 
 
 taskRoutes (Create Read Update Delete)
     - Create a Task 
@@ -15,5 +15,3 @@ taskRoutes (Create Read Update Delete)
     - update / Edit the Task 
     - Delete a Task
 
-task is less 30 min and greater than 30min throw error
-if not return true
