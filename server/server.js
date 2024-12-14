@@ -6,7 +6,7 @@ import taskRoute from './routes/taskRoutes.js'
 
 
 const app = express();
-const port = 3001;
+const port = 8080;
 
 app.use(express.json());
 
