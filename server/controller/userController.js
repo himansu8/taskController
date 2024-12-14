@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt';
 import userModel from '../models/userModel.js';
+import jwt from "jsonwebtoken" 
+import config from '../config/config.js';
 
 export const signup = async (req, res) => {
     try {
@@ -39,4 +41,32 @@ export const signup = async (req, res) => {
         res.status(500).json({ error: 'something went wrong' });
     }
 
+}
+
+
+export const login = async (req, res) => {
+    try {
+        var { email, password } = req.body;
+
+        // duplicate the email and phone
+        let emailFound = await userModel.findOne({ email: email });
+        if (!emailFound) {
+            return res.status(401).json({ error: 'Incorrect email id' })
+        }
+        let matchPassword = await bcrypt.compare(password, emailFound.password);
+        if (!matchPassword) {
+            return res.status(401).json({ error: 'Incorrect password' })
+        }
+
+        const token = jwt.sign(
+            { user_id: emailFound._id },
+            config.PRIVATE_KEY
+        );
+        var { password, ...otherDetails } = emailFound._doc;
+        res.status(200).json({ msg: 'user login successfully', token, details: { ...otherDetails } });
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: 'something went wrong' });
+    }
 }

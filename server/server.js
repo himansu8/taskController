@@ -2,7 +2,7 @@ import express from 'express'
 import './dbConnect.js';
 import cors from 'cors'
 import userRoute from './routes/userRoutes.js'
-
+import taskRoute from './routes/taskRoutes.js'
 
 
 const app = express();
@@ -21,7 +21,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 app.use('/api/user', userRoute)
-
+app.use('/api/task', taskRoute)
 
 app.get('/',(req,res)=>{
     res.status(200).send("server started up fine")
